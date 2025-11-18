@@ -1,0 +1,845 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firestore Viewer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body >
+  <div class="container">
+    <h1>Firestore Manager</h1>
+    
+    <!-- Navigation -->
+  <div class="button-container">
+      <button id="view-collections">
+        View Collections
+      </button>
+      
+      <button id="view-jacto-users">
+        Ver user
+      </button>
+    </div>
+
+    <!-- Collections View -->
+    <div id="collections-section">
+      <h2>Firestore Collections</h2>
+      <table id="collections-table">
+        <thead>
+          <tr>
+            <th>Nome da Collection</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="collections-table-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Collection Documents View -->
+    <div id="collection-documents-section" class="hidden">
+      <h2 id="collection-documents-title">Documentos da Collection</h2>
+      <button id="collection-documents-back">Voltar</button>
+      <table id="collection-documents-table">
+        <thead id="collection-documents-head"></thead>
+        <tbody id="collection-documents-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Users Table View -->
+    <div id="users-section" class="hidden">
+      <div>
+        <h2>Usuários</h2>
+        <div>
+          <button id="users-back">
+            Voltar
+          </button>
+          <button id="users-refresh">
+            Recarregar
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Email</th>
+                <th scope="col">Customer ID</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Sobrenome</th>
+                <th scope="col">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body"></tbody>
+          </table>
+        </div>
+        <p id="users-status"></p>
+      </div>
+    </div>
+
+    <!-- User Detail View -->
+    <div id="user-detail-section" class="hidden">
+      <div>
+        <div>
+          <h2>Detalhes do Usuário</h2>
+          <p id="user-detail-id"></p>
+        </div>
+        <button id="user-detail-back">
+          Voltar
+        </button>
+      </div>
+
+      <div id="user-detail-content"></div>
+    </div>
+
+    <!-- User Edit View -->
+    <div id="user-edit-section" class="hidden">
+      <div>
+        <div>
+          <h2>Editar Usuário</h2>
+          <p id="user-edit-id"></p>
+        </div>
+        <button id="user-edit-cancel">
+          Cancelar
+        </button>
+      </div>
+
+      <form id="user-edit-form">
+        <div>
+          <div>
+            <label for="edit-email">Email</label>
+            <input id="edit-email" name="email" type="email" required>
+          </div>
+          <div>
+            <label for="edit-customer-id">Customer ID</label>
+            <input id="edit-customer-id" name="customerId" type="text">
+          </div>
+          <div>
+            <label for="edit-client-sap-id">Client SAP ID</label>
+            <input id="edit-client-sap-id" name="clientSapId" type="text">
+          </div>
+        </div>
+
+        <div>
+          <h3>Informações do Usuário</h3>
+          <div>
+            <div>
+              <label for="edit-first-name">Nome</label>
+              <input id="edit-first-name" name="firstName" type="text">
+            </div>
+            <div>
+              <label for="edit-last-name">Sobrenome</label>
+              <input id="edit-last-name" name="lastName" type="text">
+            </div>
+            <div>
+              <label for="edit-phone">Telefone</label>
+              <input id="edit-phone" name="phone" type="text">
+            </div>
+            <div>
+              <label for="edit-dob">Data de Nascimento</label>
+              <input id="edit-dob" name="dob" type="text" placeholder="MM/DD/AAAA">
+            </div>
+            <div>
+              <label for="edit-document-type">Tipo de Documento</label>
+              <input id="edit-document-type" name="documentType" type="text">
+            </div>
+            <div>
+              <label for="edit-cpf">CPF</label>
+              <input id="edit-cpf" name="cpf" type="text">
+            </div>
+            <div>
+              <label for="edit-customer-id-ext">Customer ID Ext</label>
+              <input id="edit-customer-id-ext" name="customerIdExt" type="text">
+            </div>
+            <div>
+              <label for="edit-reason">Razão</label>
+              <input id="edit-reason" name="reason" type="text">
+            </div>
+            <div>
+              <label for="edit-rg">RG</label>
+              <input id="edit-rg" name="rg" type="text">
+            </div>
+            <div>
+              <label for="edit-ie">Inscrição Estadual</label>
+              <input id="edit-ie" name="ie" type="text">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3>Endereço Principal</h3>
+          <div>
+            <div>
+              <label for="edit-address1">Endereço 1</label>
+              <input id="edit-address1" name="address1" type="text">
+            </div>
+            <div>
+              <label for="edit-address2">Endereço 2</label>
+              <input id="edit-address2" name="address2" type="text">
+            </div>
+            <div>
+              <label for="edit-neighborhood">Bairro</label>
+              <input id="edit-neighborhood" name="neighborhood" type="text">
+            </div>
+            <div>
+              <label for="edit-number">Número</label>
+              <input id="edit-number" name="number" type="text">
+            </div>
+            <div>
+              <label for="edit-city">Cidade</label>
+              <input id="edit-city" name="city" type="text">
+            </div>
+            <div>
+              <label for="edit-state">Estado</label>
+              <input id="edit-state" name="state" type="text">
+            </div>
+            <div>
+              <label for="edit-zip">CEP</label>
+              <input id="edit-zip" name="zip" type="text">
+            </div>
+            <div>
+              <label for="edit-country">País</label>
+              <input id="edit-country" name="country" type="text">
+            </div>
+            <div>
+              <label for="edit-reseller">Revendedor</label>
+              <input id="edit-reseller" name="reseller" type="text">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <button type="submit">
+            Salvar
+          </button>
+        </div>
+        <p id="user-edit-status"></p>
+      </form>
+    </div>
+
+
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="hidden">
+      <div>
+        <div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let jactoUsersCache = [];
+    let selectedUser = null;
+
+    const collectionsSection = document.getElementById('collections-section');
+    
+    const usersSection = document.getElementById('users-section');
+    const userDetailSection = document.getElementById('user-detail-section');
+    const userEditSection = document.getElementById('user-edit-section');
+    const collectionDocumentsSection = document.getElementById('collection-documents-section');
+
+    const usersTableBody = document.getElementById('users-table-body');
+    const usersStatus = document.getElementById('users-status');
+    const userDetailContent = document.getElementById('user-detail-content');
+    const userDetailId = document.getElementById('user-detail-id');
+    const userEditId = document.getElementById('user-edit-id');
+    const userEditStatus = document.getElementById('user-edit-status');
+    const userEditForm = document.getElementById('user-edit-form');
+
+    const views = {
+      collections: collectionsSection,
+      users: usersSection,
+      userDetail: userDetailSection,
+      userEdit: userEditSection,
+      collectionDocuments: collectionDocumentsSection
+    };
+
+    function showView(view) {
+      Object.entries(views).forEach(([key, section]) => {
+        if (!section) return;
+        section.classList.toggle('hidden', key !== view);
+      });
+    }
+
+    document.getElementById('view-collections').addEventListener('click', () => {
+      showView('collections');
+      loadCollections();
+    });
+
+    
+
+    document.getElementById('view-jacto-users').addEventListener('click', () => {
+      showView('users');
+      loadUsers(true);
+    });
+
+    document.getElementById('users-back').addEventListener('click', () => {
+      showView('collections');
+    });
+
+    document.getElementById('users-refresh').addEventListener('click', () => {
+      loadUsers(true);
+    });
+
+    document.getElementById('user-detail-back').addEventListener('click', () => {
+      showView('users');
+    });
+
+    document.getElementById('user-edit-cancel').addEventListener('click', () => {
+      showView('users');
+      setEditStatus('');
+    });
+
+    document.getElementById('collection-documents-back').addEventListener('click', () => {
+      showView('collections');
+    });
+
+    if (usersTableBody) {
+      usersTableBody.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
+
+        const action = button.dataset.action;
+        const rawId = button.dataset.userId;
+        if (!rawId) return;
+
+        const userId = decodeURIComponent(rawId);
+        const user = findUserById(userId);
+
+        if (!user) {
+          setUsersStatus('Usuário não encontrado na lista.', 'error');
+          return;
+        }
+
+        if (action === 'view') {
+          showUserDetail(user);
+        } else if (action === 'edit') {
+          showUserEdit(user);
+        } else if (action === 'delete') {
+          handleDeleteUser(user);
+        }
+      });
+    }
+
+    if (userEditForm) {
+      userEditForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!selectedUser) return;
+
+        setEditStatus('Salvando usuário...', 'info');
+
+        const formData = new FormData(userEditForm);
+        const updatedUser = buildUpdatedUser(formData);
+
+        showLoading(true);
+        try {
+          const response = await fetch(`/jacto-users/${encodeURIComponent(selectedUser.id)}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedUser)
+          });
+
+          const result = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            throw new Error(result.error || 'Falha ao atualizar usuário');
+          }
+
+          selectedUser = result.data || updatedUser;
+          upsertUserCache(selectedUser);
+          renderUsersTable(jactoUsersCache);
+          setEditStatus('Usuário atualizado com sucesso.', 'success');
+
+          setTimeout(() => {
+            setEditStatus('');
+            showUserDetail(selectedUser);
+          }, 800);
+        } catch (error) {
+          console.error('Erro ao atualizar usuário:', error);
+          setEditStatus(error.message || 'Erro ao atualizar usuário', 'error');
+        } finally {
+          showLoading(false);
+        }
+      });
+    }
+
+    function setUsersStatus(message, type = 'info') {
+      if (!usersStatus) return;
+      usersStatus.className = type;
+      usersStatus.textContent = message;
+    }
+
+    function setEditStatus(message, type = 'info') {
+      if (!userEditStatus) return;
+      userEditStatus.className = type;
+      userEditStatus.textContent = message;
+    }
+
+    function escapeHtml(value) {
+      if (value === undefined || value === null) return '';
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function normalizeValue(value) {
+      if (value === undefined || value === null || value === '') {
+        return '—';
+      }
+      if (Array.isArray(value)) {
+        return value.length ? value.join(', ') : '—';
+      }
+      return String(value);
+    }
+
+    function detailField(label, value) {
+      return `
+        <div>
+          <p>${escapeHtml(label)}</p>
+          <p>${escapeHtml(normalizeValue(value))}</p>
+        </div>
+      `;
+    }
+
+    function renderDetailSection(title, fields) {
+      if (!fields || !fields.length) return '';
+      return `
+        <section>
+          <h3>${escapeHtml(title)}</h3>
+          <div>
+            ${fields.map((field) => detailField(field.label, field.value)).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderAddressCard(address, index) {
+      if (!address) return '';
+      const title = `Endereço ${index + 1}`;
+      const fields = [
+        { label: 'Endereço 1', value: address.address1 },
+        { label: 'Endereço 2', value: address.address2 },
+        { label: 'Bairro', value: address.neighborhood },
+        { label: 'Número', value: address.number },
+        { label: 'Cidade', value: address.city },
+        { label: 'Estado', value: address.state },
+        { label: 'CEP', value: address.zip },
+        { label: 'País', value: address.country },
+        { label: 'Revendedor', value: address.reseller }
+      ];
+
+      return `
+        <div>
+          <h4>${escapeHtml(title)}</h4>
+          <div>
+            ${fields.map((field) => detailField(field.label, field.value)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderUsersTable(users) {
+      if (!usersTableBody) return;
+
+      if (!users || users.length === 0) {
+        usersTableBody.innerHTML = `
+          <tr>
+            <td colspan="6">Nenhum usuário encontrado.</td>
+          </tr>
+        `;
+        setUsersStatus('Nenhum usuário encontrado.', 'info');
+        return;
+      }
+
+      const rows = users
+        .map((user) => {
+          const info = user.userInfo || {};
+          const encodedId = encodeURIComponent(String(user.id ?? ''));
+          return `
+            <tr>
+              <td>${formatDisplayValue(user.id)}</td>
+              <td>${formatDisplayValue(user.email)}</td>
+              <td>${formatDisplayValue(user.customerId)}</td>
+              <td>${formatDisplayValue(info.firstName)}</td>
+              <td>${formatDisplayValue(info.lastName)}</td>
+              <td>
+                <div>
+                  <button data-action="view" data-user-id="${encodedId}">Ver</button>
+                  <button data-action="edit" data-user-id="${encodedId}">Editar</button>
+                  <button data-action="delete" data-user-id="${encodedId}">Excluir</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+
+      usersTableBody.innerHTML = rows;
+      setUsersStatus(`Carregados ${users.length} usuário(s).`, 'success');
+    }
+
+    function formatDisplayValue(value) {
+      if (value === undefined || value === null || value === '') {
+        return '—';
+      }
+      return escapeHtml(String(value));
+    }
+
+    async function loadUsers(forceReload = false) {
+      if (!forceReload && jactoUsersCache.length > 0) {
+        renderUsersTable(jactoUsersCache);
+        return;
+      }
+
+      setUsersStatus('Carregando usuários...', 'info');
+      showLoading(true);
+      try {
+        const response = await fetch('/jacto-users');
+        const data = await response.json();
+
+        if (!response.ok) {
+          const message = data && data.error ? data.error : 'Falha ao carregar usuários';
+          throw new Error(message);
+        }
+
+        jactoUsersCache = Array.isArray(data) ? data : [];
+        renderUsersTable(jactoUsersCache);
+      } catch (error) {
+        console.error('Erro ao carregar usuários:', error);
+        setUsersStatus(error.message || 'Erro ao carregar usuários', 'error');
+        usersTableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-4 py-6 text-center text-red-600">${escapeHtml(error.message || 'Erro ao carregar usuários')}</td>
+          </tr>
+        `;
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function findUserById(id) {
+      return jactoUsersCache.find((user) => String(user.id) === String(id));
+    }
+
+    function showUserDetail(user) {
+      if (!userDetailContent) return;
+
+      selectedUser = user;
+      userDetailId.textContent = `ID: ${user.id || '—'}`;
+
+      const info = user.userInfo || {};
+      const addresses = Array.isArray(user.addresses) ? user.addresses : [];
+
+      const primaryFields = [
+        { label: 'ID', value: user.id },
+        { label: 'Email', value: user.email },
+        { label: 'Customer ID', value: user.customerId },
+        { label: 'Client SAP ID', value: user.clientSapId }
+      ];
+
+      const infoFields = [
+        { label: 'Nome', value: info.firstName },
+        { label: 'Sobrenome', value: info.lastName },
+        { label: 'Telefone', value: info.phone },
+        { label: 'Data de Nascimento', value: info.dob },
+        { label: 'CPF', value: info.cpf },
+        { label: 'Tipo de Documento', value: info.documentType },
+        { label: 'Customer ID Ext', value: info.customerIdExt },
+        { label: 'Razão', value: info.reason },
+        { label: 'RG', value: info.rg },
+        { label: 'Inscrição Estadual', value: info.ie },
+        { label: 'Customer ID Zoop', value: info.customerIdZoop }
+      ];
+
+      const addressesMarkup = addresses.length
+        ? addresses.map((address, index) => renderAddressCard(address, index)).join('')
+        : '<p>Nenhum endereço cadastrado.</p>';
+
+      const cartItemsMarkup = Array.isArray(user.cartItems) && user.cartItems.length
+        ? `<pre>${escapeHtml(JSON.stringify(user.cartItems, null, 2))}</pre>`
+        : '<p>Nenhum item no carrinho.</p>';
+
+      userDetailContent.innerHTML = `
+        ${renderDetailSection('Dados Principais', primaryFields)}
+        ${renderDetailSection('Informações do Usuário', infoFields)}
+        <section>
+          <h3>Endereços</h3>
+          ${addressesMarkup}
+        </section>
+        <section>
+          <h3>Carrinho</h3>
+          ${cartItemsMarkup}
+        </section>
+        <section>
+          <h3>JSON Completo</h3>
+          <pre>${escapeHtml(JSON.stringify(user, null, 2))}</pre>
+        </section>
+      `;
+
+      showView('userDetail');
+    }
+
+    function showUserEdit(user) {
+      if (!userEditForm) return;
+
+      selectedUser = user;
+      userEditId.textContent = `ID: ${user.id || '—'}`;
+      setEditStatus('');
+
+      populateEditForm(user);
+      showView('userEdit');
+    }
+
+    function populateEditForm(user) {
+      const info = user.userInfo || {};
+      const address = Array.isArray(user.addresses) && user.addresses.length ? { ...user.addresses[0] } : {};
+
+      setInputValue('edit-email', formatInputValue(user.email));
+      setInputValue('edit-customer-id', formatInputValue(user.customerId));
+      setInputValue('edit-client-sap-id', formatInputValue(user.clientSapId));
+      setInputValue('edit-first-name', formatInputValue(info.firstName));
+      setInputValue('edit-last-name', formatInputValue(info.lastName));
+      setInputValue('edit-phone', formatInputValue(info.phone));
+      setInputValue('edit-dob', formatInputValue(info.dob));
+      setInputValue('edit-document-type', formatInputValue(info.documentType));
+      setInputValue('edit-cpf', formatInputValue(info.cpf));
+      setInputValue('edit-customer-id-ext', formatInputValue(info.customerIdExt));
+      setInputValue('edit-reason', formatInputValue(info.reason));
+      setInputValue('edit-rg', formatInputValue(info.rg));
+      setInputValue('edit-ie', formatInputValue(info.ie));
+
+      setInputValue('edit-address1', formatInputValue(address.address1));
+      setInputValue('edit-address2', formatInputValue(address.address2));
+      setInputValue('edit-neighborhood', formatInputValue(address.neighborhood));
+      setInputValue('edit-number', formatInputValue(address.number));
+      setInputValue('edit-city', formatInputValue(address.city));
+      setInputValue('edit-state', formatInputValue(address.state));
+      setInputValue('edit-zip', formatInputValue(address.zip));
+      setInputValue('edit-country', formatInputValue(address.country));
+      setInputValue('edit-reseller', formatInputValue(address.reseller));
+    }
+
+    function setInputValue(id, value) {
+      const input = document.getElementById(id);
+      if (input) {
+        input.value = value ?? '';
+      }
+    }
+
+    function formatInputValue(value) {
+      if (value === undefined || value === null) return '';
+      return typeof value === 'number' ? String(value) : value;
+    }
+
+    function buildUpdatedUser(formData) {
+      const base = JSON.parse(JSON.stringify(selectedUser || {}));
+
+      const email = (formData.get('email') || '').trim();
+      base.email = email;
+      const customerIdValue = parseNumberField(formData.get('customerId'));
+      if (customerIdValue === null) {
+        delete base.customerId;
+      } else {
+        base.customerId = customerIdValue;
+      }
+
+      base.clientSapId = (formData.get('clientSapId') || '').trim();
+
+      const info = { ...(base.userInfo || {}) };
+      info.firstName = (formData.get('firstName') || '').trim();
+      info.lastName = (formData.get('lastName') || '').trim();
+      info.phone = (formData.get('phone') || '').trim();
+      info.dob = (formData.get('dob') || '').trim();
+      info.documentType = (formData.get('documentType') || '').trim();
+      info.cpf = (formData.get('cpf') || '').trim();
+      info.customerIdExt = (formData.get('customerIdExt') || '').trim();
+      info.reason = (formData.get('reason') || '').trim();
+      info.rg = (formData.get('rg') || '').trim();
+      info.ie = (formData.get('ie') || '').trim();
+      info.email = email;
+      base.userInfo = info;
+
+      const existingAddress = Array.isArray(base.addresses) && base.addresses.length ? { ...base.addresses[0] } : {};
+      const addressFields = ['address1', 'address2', 'neighborhood', 'number', 'city', 'state', 'zip', 'country', 'reseller'];
+
+      let hasAddressData = false;
+      addressFields.forEach((field) => {
+        const value = (formData.get(field) || '').trim();
+        if (value) {
+          hasAddressData = true;
+        }
+        existingAddress[field] = value;
+      });
+
+      if (hasAddressData) {
+        base.addresses = [existingAddress];
+      } else {
+        base.addresses = [];
+      }
+
+      return base;
+    }
+
+    function parseNumberField(rawValue) {
+      if (rawValue === undefined || rawValue === null) return null;
+      const value = rawValue.toString().trim();
+      if (!value) return null;
+
+      const numeric = Number(value);
+      if (Number.isNaN(numeric)) {
+        return value;
+      }
+      return numeric;
+    }
+
+    function upsertUserCache(user) {
+      const index = jactoUsersCache.findIndex((item) => String(item.id) === String(user.id));
+      if (index >= 0) {
+        jactoUsersCache[index] = user;
+      } else {
+        jactoUsersCache.push(user);
+      }
+    }
+
+    async function handleDeleteUser(user) {
+      const confirmed = window.confirm(`Deseja realmente excluir o usuário ${user.email || user.id}? Uma cópia será baixada antes da exclusão.`);
+      if (!confirmed) return;
+
+      downloadUserJson(user);
+
+      setUsersStatus('Excluindo usuário...', 'info');
+      showLoading(true);
+
+      try {
+        const response = await fetch(`/jacto-users/${encodeURIComponent(user.id)}`, {
+          method: 'DELETE'
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Falha ao excluir usuário');
+        }
+
+        jactoUsersCache = jactoUsersCache.filter((item) => String(item.id) !== String(user.id));
+        if (selectedUser && String(selectedUser.id) === String(user.id)) {
+          selectedUser = null;
+        }
+
+        renderUsersTable(jactoUsersCache);
+        setUsersStatus('Usuário excluído com sucesso.', 'success');
+        showView('users');
+      } catch (error) {
+        console.error('Erro ao excluir usuário:', error);
+        setUsersStatus(error.message || 'Erro ao excluir usuário', 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function downloadUserJson(user) {
+      const fileNameBase = user.id || user.email || 'usuario';
+      const safeFileName = fileNameBase.replace(/[^a-z0-9._-]/gi, '_');
+      const blob = new Blob([JSON.stringify(user, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${safeFileName}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    // Load collections
+    async function loadCollections() {
+      showLoading(true);
+      try {
+        const response = await fetch('/collections');
+        if (!response.ok) {
+          throw new Error('Failed to fetch collections');
+        }
+        const collections = await response.json();
+        const collectionsTableBody = document.getElementById('collections-table-body');
+        collectionsTableBody.innerHTML = '';
+        collections.forEach((collection) => {
+          const tr = document.createElement('tr');
+          const tdName = document.createElement('td');
+          tdName.textContent = collection;
+          const tdActions = document.createElement('td');
+          const button = document.createElement('button');
+          button.textContent = 'Ver Documentos';
+          button.addEventListener('click', () => viewCollectionDocuments(collection));
+          tdActions.appendChild(button);
+          tr.appendChild(tdName);
+          tr.appendChild(tdActions);
+          collectionsTableBody.appendChild(tr);
+        });
+      } catch (error) {
+        console.error('Error loading collections:', error);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function viewCollectionDocuments(collectionId) {
+      document.getElementById('collection-documents-title').textContent = `Documentos da Collection: ${collectionId}`;
+      showLoading(true);
+      try {
+        const response = await fetch(`/collections/${encodeURIComponent(collectionId)}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch collection documents');
+        }
+        const documents = await response.json();
+        const head = document.getElementById('collection-documents-head');
+        const body = document.getElementById('collection-documents-body');
+        head.innerHTML = '<tr><th>ID</th><th>Dados (JSON)</th></tr>';
+        body.innerHTML = '';
+        documents.forEach((doc) => {
+          const tr = document.createElement('tr');
+          const tdId = document.createElement('td');
+          tdId.textContent = doc.id;
+          const tdData = document.createElement('td');
+          tdData.textContent = JSON.stringify(doc, null, 2);
+          tr.appendChild(tdId);
+          tr.appendChild(tdData);
+          body.appendChild(tr);
+        });
+        showView('collectionDocuments');
+      } catch (error) {
+        console.error('Error loading documents:', error);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    
+
+    // Utility functions
+    function showLoading(show) {
+      const overlay = document.getElementById('loading');
+      if (!overlay) {
+        return;
+      }
+      overlay.classList.toggle('hidden', !show);
+    }
+
+    
+
+    // Initialize
+    showView('collections');
+    loadCollections();
+  </script>
+</body>
+</html>
