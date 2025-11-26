@@ -1,845 +1,421 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firestore Viewer</title>
+  <title>Jacto Admin - Firestore Manager</title>
   <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body >
-  <div class="container">
-    <h1>Firestore Manager</h1>
-    
-    <!-- Navigation -->
-  <div class="button-container">
-      <button id="view-collections">
-        View Collections
-      </button>
-      
-      <button id="view-jacto-users">
-        Ver user
-      </button>
-    </div>
-
-    <!-- Collections View -->
-    <div id="collections-section">
-      <h2>Firestore Collections</h2>
-      <table id="collections-table">
-        <thead>
-          <tr>
-            <th>Nome da Collection</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="collections-table-body"></tbody>
-      </table>
-    </div>
-
-    <!-- Collection Documents View -->
-    <div id="collection-documents-section" class="hidden">
-      <h2 id="collection-documents-title">Documentos da Collection</h2>
-      <button id="collection-documents-back">Voltar</button>
-      <table id="collection-documents-table">
-        <thead id="collection-documents-head"></thead>
-        <tbody id="collection-documents-body"></tbody>
-      </table>
-    </div>
-
-    <!-- Users Table View -->
-    <div id="users-section" class="hidden">
-      <div>
-        <h2>Usuários</h2>
-        <div>
-          <button id="users-back">
-            Voltar
-          </button>
-          <button id="users-refresh">
-            Recarregar
-          </button>
+<body>
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fas fa-database"></i>
+          <span>Jacto Admin</span>
         </div>
       </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li class="nav-item active" data-view="dashboard">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </li>
+          <li class="nav-item" data-view="services">
+            <i class="fas fa-cogs"></i>
+            <span>Serviços</span>
+          </li>
+          <li class="nav-item" data-view="prices">
+            <i class="fas fa-tags"></i>
+            <span>Preços</span>
+          </li>
+          <li class="nav-divider"></li>
+          <li class="nav-item" data-view="collections">
+            <i class="fas fa-layer-group"></i>
+            <span>Collections</span>
+          </li>
+        </ul>
+      </nav>
+    </aside>
 
-      <div>
-        <div>
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Email</th>
-                <th scope="col">Customer ID</th>
-                <th scope="col">Nome</th>
-                <th scope="col">Sobrenome</th>
-                <th scope="col">Ação</th>
-              </tr>
-            </thead>
-            <tbody id="users-table-body"></tbody>
-          </table>
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="menu-toggle" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 id="page-title">Dashboard</h1>
         </div>
-        <p id="users-status"></p>
+        <div class="header-right">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Buscar..." id="global-search">
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Dashboard View -->
+        <section id="dashboard-view" class="view active">
+          <div class="stats-grid">
+            <div class="stat-card" data-view="services">
+              <div class="stat-icon services">
+                <i class="fas fa-cogs"></i>
+              </div>
+              <div class="stat-info">
+                <h3 id="services-count">0</h3>
+                <p>Serviços</p>
+              </div>
+            </div>
+            <div class="stat-card" data-view="prices">
+              <div class="stat-icon prices">
+                <i class="fas fa-tags"></i>
+              </div>
+              <div class="stat-info">
+                <h3 id="prices-count">0</h3>
+                <p>Preços</p>
+              </div>
+            </div>
+            <div class="stat-card" data-view="collections">
+              <div class="stat-icon collections">
+                <i class="fas fa-layer-group"></i>
+              </div>
+              <div class="stat-info">
+                <h3 id="collections-count">0</h3>
+                <p>Collections</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-actions">
+            <h2>Ações Rápidas</h2>
+            <div class="actions-grid">
+              <button class="action-card" id="quick-add-service">
+                <i class="fas fa-plus-circle"></i>
+                <span>Novo Serviço</span>
+              </button>
+              <button class="action-card" id="quick-add-price">
+                <i class="fas fa-plus-circle"></i>
+                <span>Novo Preço</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="cache-section">
+            <h2><i class="fas fa-database"></i> Cache Local</h2>
+            <p class="cache-description">Os dados são armazenados localmente para carregamento mais rápido. O cache expira automaticamente após 5 minutos.</p>
+            <div class="cache-actions">
+              <button class="btn btn-secondary" onclick="getCacheStats()">
+                <i class="fas fa-chart-pie"></i> Ver Estatísticas
+              </button>
+              <button class="btn btn-warning" onclick="clearAllCache()">
+                <i class="fas fa-trash-alt"></i> Limpar Cache
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Services View -->
+        <section id="services-view" class="view">
+          <div class="view-header">
+            <div class="view-title">
+              <h2>Gerenciamento de Serviços</h2>
+              <p>Adicione, edite ou remova serviços do Firestore</p>
+            </div>
+            <div class="view-actions">
+              <button class="btn btn-secondary" onclick="forceRefreshServices()" title="Atualizar do servidor">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+              <button class="btn btn-primary" id="add-service-btn">
+                <i class="fas fa-plus"></i> Novo Serviço
+              </button>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-group">
+              <input type="text" placeholder="Buscar serviço..." id="services-search" class="filter-input">
+            </div>
+            <div class="filter-group">
+              <select id="services-filter-categoria" class="filter-select">
+                <option value="">Todas Categorias</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <select id="services-filter-segmento" class="filter-select">
+                <option value="">Todos Segmentos</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table" id="services-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tipo</th>
+                  <th>Serviço</th>
+                  <th>Categoria</th>
+                  <th>Segmento</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="services-table-body">
+                <!-- Services will be rendered here -->
+              </tbody>
+            </table>
+          </div>
+          <div id="services-pagination" class="pagination-container"></div>
+          <div id="services-empty" class="empty-state hidden">
+            <i class="fas fa-inbox"></i>
+            <p>Nenhum serviço encontrado</p>
+          </div>
+        </section>
+
+        <!-- Prices View -->
+        <section id="prices-view" class="view">
+          <div class="view-header">
+            <div class="view-title">
+              <h2>Gerenciamento de Preços</h2>
+              <p>Adicione, edite ou remova preços por região</p>
+            </div>
+            <div class="view-actions">
+              <button class="btn btn-secondary" onclick="forceRefreshPrices()" title="Atualizar do servidor">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+              <button class="btn btn-primary" id="add-price-btn">
+                <i class="fas fa-plus"></i> Novo Preço
+              </button>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-group">
+              <input type="text" placeholder="Buscar por código..." id="prices-search" class="filter-input">
+            </div>
+            <div class="filter-group">
+              <select id="prices-filter-env" class="filter-select">
+                <option value="">Todos Ambientes</option>
+                <option value="HML">HML</option>
+                <option value="PRD">PRD</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table" id="prices-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>UM</th>
+                  <th>HML (SP)</th>
+                  <th>PRD (SP)</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="prices-table-body">
+                <!-- Prices will be rendered here -->
+              </tbody>
+            </table>
+          </div>
+          <div id="prices-pagination" class="pagination-container"></div>
+          <div id="prices-empty" class="empty-state hidden">
+            <i class="fas fa-inbox"></i>
+            <p>Nenhum preço encontrado</p>
+          </div>
+        </section>
+
+        <!-- Collections View -->
+        <section id="collections-view" class="view">
+          <div class="view-header">
+            <div class="view-title">
+              <h2>Collections do Firestore</h2>
+              <p>Visualize todas as collections disponíveis</p>
+            </div>
+          </div>
+
+          <div class="collections-grid" id="collections-grid">
+            <!-- Collections will be rendered here -->
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
+  </div>
 
-    <!-- User Detail View -->
-    <div id="user-detail-section" class="hidden">
-      <div>
-        <div>
-          <h2>Detalhes do Usuário</h2>
-          <p id="user-detail-id"></p>
-        </div>
-        <button id="user-detail-back">
-          Voltar
+  <!-- Modal for Service Edit/Create -->
+  <div class="modal-overlay hidden" id="service-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="service-modal-title">Novo Serviço</h3>
+        <button class="modal-close" id="service-modal-close">
+          <i class="fas fa-times"></i>
         </button>
       </div>
-
-      <div id="user-detail-content"></div>
-    </div>
-
-    <!-- User Edit View -->
-    <div id="user-edit-section" class="hidden">
-      <div>
-        <div>
-          <h2>Editar Usuário</h2>
-          <p id="user-edit-id"></p>
-        </div>
-        <button id="user-edit-cancel">
-          Cancelar
-        </button>
-      </div>
-
-      <form id="user-edit-form">
-        <div>
-          <div>
-            <label for="edit-email">Email</label>
-            <input id="edit-email" name="email" type="email" required>
+      <form id="service-form" class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="service-id">ID *</label>
+            <input type="text" id="service-id" name="id" required>
           </div>
-          <div>
-            <label for="edit-customer-id">Customer ID</label>
-            <input id="edit-customer-id" name="customerId" type="text">
-          </div>
-          <div>
-            <label for="edit-client-sap-id">Client SAP ID</label>
-            <input id="edit-client-sap-id" name="clientSapId" type="text">
+          <div class="form-group">
+            <label for="service-codigo">Código *</label>
+            <input type="number" id="service-codigo" name="codigo" required>
           </div>
         </div>
 
-        <div>
-          <h3>Informações do Usuário</h3>
-          <div>
-            <div>
-              <label for="edit-first-name">Nome</label>
-              <input id="edit-first-name" name="firstName" type="text">
-            </div>
-            <div>
-              <label for="edit-last-name">Sobrenome</label>
-              <input id="edit-last-name" name="lastName" type="text">
-            </div>
-            <div>
-              <label for="edit-phone">Telefone</label>
-              <input id="edit-phone" name="phone" type="text">
-            </div>
-            <div>
-              <label for="edit-dob">Data de Nascimento</label>
-              <input id="edit-dob" name="dob" type="text" placeholder="MM/DD/AAAA">
-            </div>
-            <div>
-              <label for="edit-document-type">Tipo de Documento</label>
-              <input id="edit-document-type" name="documentType" type="text">
-            </div>
-            <div>
-              <label for="edit-cpf">CPF</label>
-              <input id="edit-cpf" name="cpf" type="text">
-            </div>
-            <div>
-              <label for="edit-customer-id-ext">Customer ID Ext</label>
-              <input id="edit-customer-id-ext" name="customerIdExt" type="text">
-            </div>
-            <div>
-              <label for="edit-reason">Razão</label>
-              <input id="edit-reason" name="reason" type="text">
-            </div>
-            <div>
-              <label for="edit-rg">RG</label>
-              <input id="edit-rg" name="rg" type="text">
-            </div>
-            <div>
-              <label for="edit-ie">Inscrição Estadual</label>
-              <input id="edit-ie" name="ie" type="text">
-            </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="service-tipo">Tipo *</label>
+            <input type="text" id="service-tipo" name="tipo" required>
+          </div>
+          <div class="form-group">
+            <label for="service-servico">Serviço *</label>
+            <input type="text" id="service-servico" name="servico" required>
           </div>
         </div>
 
-        <div>
-          <h3>Endereço Principal</h3>
-          <div>
-            <div>
-              <label for="edit-address1">Endereço 1</label>
-              <input id="edit-address1" name="address1" type="text">
-            </div>
-            <div>
-              <label for="edit-address2">Endereço 2</label>
-              <input id="edit-address2" name="address2" type="text">
-            </div>
-            <div>
-              <label for="edit-neighborhood">Bairro</label>
-              <input id="edit-neighborhood" name="neighborhood" type="text">
-            </div>
-            <div>
-              <label for="edit-number">Número</label>
-              <input id="edit-number" name="number" type="text">
-            </div>
-            <div>
-              <label for="edit-city">Cidade</label>
-              <input id="edit-city" name="city" type="text">
-            </div>
-            <div>
-              <label for="edit-state">Estado</label>
-              <input id="edit-state" name="state" type="text">
-            </div>
-            <div>
-              <label for="edit-zip">CEP</label>
-              <input id="edit-zip" name="zip" type="text">
-            </div>
-            <div>
-              <label for="edit-country">País</label>
-              <input id="edit-country" name="country" type="text">
-            </div>
-            <div>
-              <label for="edit-reseller">Revendedor</label>
-              <input id="edit-reseller" name="reseller" type="text">
-            </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="service-categoria">Categoria *</label>
+            <input type="text" id="service-categoria" name="categoria" required>
+          </div>
+          <div class="form-group">
+            <label for="service-subcategoria">Subcategoria</label>
+            <input type="text" id="service-subcategoria" name="subcategoria">
           </div>
         </div>
 
-        <div>
-          <button type="submit">
-            Salvar
+        <div class="form-row">
+          <div class="form-group">
+            <label for="service-segmento">Segmento *</label>
+            <input type="text" id="service-segmento" name="segmento" required>
+          </div>
+          <div class="form-group">
+            <label for="service-versao">Versão</label>
+            <input type="text" id="service-versao" name="versao">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="service-edicao">Edição</label>
+            <input type="text" id="service-edicao" name="edicao">
+          </div>
+          <div class="form-group">
+            <label for="service-imagem">URL da Imagem</label>
+            <input type="url" id="service-imagem" name="imagem">
+          </div>
+        </div>
+
+        <!-- Products Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <h4>Produtos</h4>
+            <button type="button" class="btn btn-sm btn-secondary" id="add-product-btn">
+              <i class="fas fa-plus"></i> Adicionar Produto
+            </button>
+          </div>
+          <div id="products-container">
+            <!-- Products will be added dynamically -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="service-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Salvar
           </button>
         </div>
-        <p id="user-edit-status"></p>
       </form>
     </div>
+  </div>
 
-
-
-    <!-- Loading Spinner -->
-    <div id="loading" class="hidden">
-      <div>
-        <div>
-          <div></div>
+  <!-- Modal for Price Edit/Create -->
+  <div class="modal-overlay hidden" id="price-modal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 id="price-modal-title">Novo Preço</h3>
+        <button class="modal-close" id="price-modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="price-form" class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="price-id">ID *</label>
+            <input type="text" id="price-id" name="id" required>
+          </div>
+          <div class="form-group">
+            <label for="price-code">Código *</label>
+            <input type="text" id="price-code" name="code" required>
+          </div>
+          <div class="form-group">
+            <label for="price-um">Unidade de Medida *</label>
+            <input type="text" id="price-um" name="um" required placeholder="PC, UN, KG...">
+          </div>
         </div>
+
+        <!-- Prices by Environment and State -->
+        <div class="form-section">
+          <div class="section-header">
+            <h4>Preços por Estado</h4>
+            <div class="env-tabs">
+              <button type="button" class="env-tab active" data-env="HML">HML</button>
+              <button type="button" class="env-tab" data-env="PRD">PRD</button>
+            </div>
+          </div>
+          
+          <div id="prices-hml-container" class="prices-grid">
+            <!-- HML prices will be rendered here -->
+          </div>
+          <div id="prices-prd-container" class="prices-grid hidden">
+            <!-- PRD prices will be rendered here -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="price-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay hidden" id="loading">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
+    </div>
+  </div>
+
+  <!-- Confirm Dialog -->
+  <div class="modal-overlay hidden" id="confirm-modal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Confirmar Ação</h3>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message">Tem certeza que deseja realizar esta ação?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="confirm-cancel">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirm-ok">Confirmar</button>
       </div>
     </div>
   </div>
 
-  <script>
-    let jactoUsersCache = [];
-    let selectedUser = null;
-
-    const collectionsSection = document.getElementById('collections-section');
-    
-    const usersSection = document.getElementById('users-section');
-    const userDetailSection = document.getElementById('user-detail-section');
-    const userEditSection = document.getElementById('user-edit-section');
-    const collectionDocumentsSection = document.getElementById('collection-documents-section');
-
-    const usersTableBody = document.getElementById('users-table-body');
-    const usersStatus = document.getElementById('users-status');
-    const userDetailContent = document.getElementById('user-detail-content');
-    const userDetailId = document.getElementById('user-detail-id');
-    const userEditId = document.getElementById('user-edit-id');
-    const userEditStatus = document.getElementById('user-edit-status');
-    const userEditForm = document.getElementById('user-edit-form');
-
-    const views = {
-      collections: collectionsSection,
-      users: usersSection,
-      userDetail: userDetailSection,
-      userEdit: userEditSection,
-      collectionDocuments: collectionDocumentsSection
-    };
-
-    function showView(view) {
-      Object.entries(views).forEach(([key, section]) => {
-        if (!section) return;
-        section.classList.toggle('hidden', key !== view);
-      });
-    }
-
-    document.getElementById('view-collections').addEventListener('click', () => {
-      showView('collections');
-      loadCollections();
-    });
-
-    
-
-    document.getElementById('view-jacto-users').addEventListener('click', () => {
-      showView('users');
-      loadUsers(true);
-    });
-
-    document.getElementById('users-back').addEventListener('click', () => {
-      showView('collections');
-    });
-
-    document.getElementById('users-refresh').addEventListener('click', () => {
-      loadUsers(true);
-    });
-
-    document.getElementById('user-detail-back').addEventListener('click', () => {
-      showView('users');
-    });
-
-    document.getElementById('user-edit-cancel').addEventListener('click', () => {
-      showView('users');
-      setEditStatus('');
-    });
-
-    document.getElementById('collection-documents-back').addEventListener('click', () => {
-      showView('collections');
-    });
-
-    if (usersTableBody) {
-      usersTableBody.addEventListener('click', (event) => {
-        const button = event.target.closest('button[data-action]');
-        if (!button) return;
-
-        const action = button.dataset.action;
-        const rawId = button.dataset.userId;
-        if (!rawId) return;
-
-        const userId = decodeURIComponent(rawId);
-        const user = findUserById(userId);
-
-        if (!user) {
-          setUsersStatus('Usuário não encontrado na lista.', 'error');
-          return;
-        }
-
-        if (action === 'view') {
-          showUserDetail(user);
-        } else if (action === 'edit') {
-          showUserEdit(user);
-        } else if (action === 'delete') {
-          handleDeleteUser(user);
-        }
-      });
-    }
-
-    if (userEditForm) {
-      userEditForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        if (!selectedUser) return;
-
-        setEditStatus('Salvando usuário...', 'info');
-
-        const formData = new FormData(userEditForm);
-        const updatedUser = buildUpdatedUser(formData);
-
-        showLoading(true);
-        try {
-          const response = await fetch(`/jacto-users/${encodeURIComponent(selectedUser.id)}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updatedUser)
-          });
-
-          const result = await response.json().catch(() => ({}));
-
-          if (!response.ok) {
-            throw new Error(result.error || 'Falha ao atualizar usuário');
-          }
-
-          selectedUser = result.data || updatedUser;
-          upsertUserCache(selectedUser);
-          renderUsersTable(jactoUsersCache);
-          setEditStatus('Usuário atualizado com sucesso.', 'success');
-
-          setTimeout(() => {
-            setEditStatus('');
-            showUserDetail(selectedUser);
-          }, 800);
-        } catch (error) {
-          console.error('Erro ao atualizar usuário:', error);
-          setEditStatus(error.message || 'Erro ao atualizar usuário', 'error');
-        } finally {
-          showLoading(false);
-        }
-      });
-    }
-
-    function setUsersStatus(message, type = 'info') {
-      if (!usersStatus) return;
-      usersStatus.className = type;
-      usersStatus.textContent = message;
-    }
-
-    function setEditStatus(message, type = 'info') {
-      if (!userEditStatus) return;
-      userEditStatus.className = type;
-      userEditStatus.textContent = message;
-    }
-
-    function escapeHtml(value) {
-      if (value === undefined || value === null) return '';
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function normalizeValue(value) {
-      if (value === undefined || value === null || value === '') {
-        return '—';
-      }
-      if (Array.isArray(value)) {
-        return value.length ? value.join(', ') : '—';
-      }
-      return String(value);
-    }
-
-    function detailField(label, value) {
-      return `
-        <div>
-          <p>${escapeHtml(label)}</p>
-          <p>${escapeHtml(normalizeValue(value))}</p>
-        </div>
-      `;
-    }
-
-    function renderDetailSection(title, fields) {
-      if (!fields || !fields.length) return '';
-      return `
-        <section>
-          <h3>${escapeHtml(title)}</h3>
-          <div>
-            ${fields.map((field) => detailField(field.label, field.value)).join('')}
-          </div>
-        </section>
-      `;
-    }
-
-    function renderAddressCard(address, index) {
-      if (!address) return '';
-      const title = `Endereço ${index + 1}`;
-      const fields = [
-        { label: 'Endereço 1', value: address.address1 },
-        { label: 'Endereço 2', value: address.address2 },
-        { label: 'Bairro', value: address.neighborhood },
-        { label: 'Número', value: address.number },
-        { label: 'Cidade', value: address.city },
-        { label: 'Estado', value: address.state },
-        { label: 'CEP', value: address.zip },
-        { label: 'País', value: address.country },
-        { label: 'Revendedor', value: address.reseller }
-      ];
-
-      return `
-        <div>
-          <h4>${escapeHtml(title)}</h4>
-          <div>
-            ${fields.map((field) => detailField(field.label, field.value)).join('')}
-          </div>
-        </div>
-      `;
-    }
-
-    function renderUsersTable(users) {
-      if (!usersTableBody) return;
-
-      if (!users || users.length === 0) {
-        usersTableBody.innerHTML = `
-          <tr>
-            <td colspan="6">Nenhum usuário encontrado.</td>
-          </tr>
-        `;
-        setUsersStatus('Nenhum usuário encontrado.', 'info');
-        return;
-      }
-
-      const rows = users
-        .map((user) => {
-          const info = user.userInfo || {};
-          const encodedId = encodeURIComponent(String(user.id ?? ''));
-          return `
-            <tr>
-              <td>${formatDisplayValue(user.id)}</td>
-              <td>${formatDisplayValue(user.email)}</td>
-              <td>${formatDisplayValue(user.customerId)}</td>
-              <td>${formatDisplayValue(info.firstName)}</td>
-              <td>${formatDisplayValue(info.lastName)}</td>
-              <td>
-                <div>
-                  <button data-action="view" data-user-id="${encodedId}">Ver</button>
-                  <button data-action="edit" data-user-id="${encodedId}">Editar</button>
-                  <button data-action="delete" data-user-id="${encodedId}">Excluir</button>
-                </div>
-              </td>
-            </tr>
-          `;
-        })
-        .join('');
-
-      usersTableBody.innerHTML = rows;
-      setUsersStatus(`Carregados ${users.length} usuário(s).`, 'success');
-    }
-
-    function formatDisplayValue(value) {
-      if (value === undefined || value === null || value === '') {
-        return '—';
-      }
-      return escapeHtml(String(value));
-    }
-
-    async function loadUsers(forceReload = false) {
-      if (!forceReload && jactoUsersCache.length > 0) {
-        renderUsersTable(jactoUsersCache);
-        return;
-      }
-
-      setUsersStatus('Carregando usuários...', 'info');
-      showLoading(true);
-      try {
-        const response = await fetch('/jacto-users');
-        const data = await response.json();
-
-        if (!response.ok) {
-          const message = data && data.error ? data.error : 'Falha ao carregar usuários';
-          throw new Error(message);
-        }
-
-        jactoUsersCache = Array.isArray(data) ? data : [];
-        renderUsersTable(jactoUsersCache);
-      } catch (error) {
-        console.error('Erro ao carregar usuários:', error);
-        setUsersStatus(error.message || 'Erro ao carregar usuários', 'error');
-        usersTableBody.innerHTML = `
-          <tr>
-            <td colspan="6" class="px-4 py-6 text-center text-red-600">${escapeHtml(error.message || 'Erro ao carregar usuários')}</td>
-          </tr>
-        `;
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    function findUserById(id) {
-      return jactoUsersCache.find((user) => String(user.id) === String(id));
-    }
-
-    function showUserDetail(user) {
-      if (!userDetailContent) return;
-
-      selectedUser = user;
-      userDetailId.textContent = `ID: ${user.id || '—'}`;
-
-      const info = user.userInfo || {};
-      const addresses = Array.isArray(user.addresses) ? user.addresses : [];
-
-      const primaryFields = [
-        { label: 'ID', value: user.id },
-        { label: 'Email', value: user.email },
-        { label: 'Customer ID', value: user.customerId },
-        { label: 'Client SAP ID', value: user.clientSapId }
-      ];
-
-      const infoFields = [
-        { label: 'Nome', value: info.firstName },
-        { label: 'Sobrenome', value: info.lastName },
-        { label: 'Telefone', value: info.phone },
-        { label: 'Data de Nascimento', value: info.dob },
-        { label: 'CPF', value: info.cpf },
-        { label: 'Tipo de Documento', value: info.documentType },
-        { label: 'Customer ID Ext', value: info.customerIdExt },
-        { label: 'Razão', value: info.reason },
-        { label: 'RG', value: info.rg },
-        { label: 'Inscrição Estadual', value: info.ie },
-        { label: 'Customer ID Zoop', value: info.customerIdZoop }
-      ];
-
-      const addressesMarkup = addresses.length
-        ? addresses.map((address, index) => renderAddressCard(address, index)).join('')
-        : '<p>Nenhum endereço cadastrado.</p>';
-
-      const cartItemsMarkup = Array.isArray(user.cartItems) && user.cartItems.length
-        ? `<pre>${escapeHtml(JSON.stringify(user.cartItems, null, 2))}</pre>`
-        : '<p>Nenhum item no carrinho.</p>';
-
-      userDetailContent.innerHTML = `
-        ${renderDetailSection('Dados Principais', primaryFields)}
-        ${renderDetailSection('Informações do Usuário', infoFields)}
-        <section>
-          <h3>Endereços</h3>
-          ${addressesMarkup}
-        </section>
-        <section>
-          <h3>Carrinho</h3>
-          ${cartItemsMarkup}
-        </section>
-        <section>
-          <h3>JSON Completo</h3>
-          <pre>${escapeHtml(JSON.stringify(user, null, 2))}</pre>
-        </section>
-      `;
-
-      showView('userDetail');
-    }
-
-    function showUserEdit(user) {
-      if (!userEditForm) return;
-
-      selectedUser = user;
-      userEditId.textContent = `ID: ${user.id || '—'}`;
-      setEditStatus('');
-
-      populateEditForm(user);
-      showView('userEdit');
-    }
-
-    function populateEditForm(user) {
-      const info = user.userInfo || {};
-      const address = Array.isArray(user.addresses) && user.addresses.length ? { ...user.addresses[0] } : {};
-
-      setInputValue('edit-email', formatInputValue(user.email));
-      setInputValue('edit-customer-id', formatInputValue(user.customerId));
-      setInputValue('edit-client-sap-id', formatInputValue(user.clientSapId));
-      setInputValue('edit-first-name', formatInputValue(info.firstName));
-      setInputValue('edit-last-name', formatInputValue(info.lastName));
-      setInputValue('edit-phone', formatInputValue(info.phone));
-      setInputValue('edit-dob', formatInputValue(info.dob));
-      setInputValue('edit-document-type', formatInputValue(info.documentType));
-      setInputValue('edit-cpf', formatInputValue(info.cpf));
-      setInputValue('edit-customer-id-ext', formatInputValue(info.customerIdExt));
-      setInputValue('edit-reason', formatInputValue(info.reason));
-      setInputValue('edit-rg', formatInputValue(info.rg));
-      setInputValue('edit-ie', formatInputValue(info.ie));
-
-      setInputValue('edit-address1', formatInputValue(address.address1));
-      setInputValue('edit-address2', formatInputValue(address.address2));
-      setInputValue('edit-neighborhood', formatInputValue(address.neighborhood));
-      setInputValue('edit-number', formatInputValue(address.number));
-      setInputValue('edit-city', formatInputValue(address.city));
-      setInputValue('edit-state', formatInputValue(address.state));
-      setInputValue('edit-zip', formatInputValue(address.zip));
-      setInputValue('edit-country', formatInputValue(address.country));
-      setInputValue('edit-reseller', formatInputValue(address.reseller));
-    }
-
-    function setInputValue(id, value) {
-      const input = document.getElementById(id);
-      if (input) {
-        input.value = value ?? '';
-      }
-    }
-
-    function formatInputValue(value) {
-      if (value === undefined || value === null) return '';
-      return typeof value === 'number' ? String(value) : value;
-    }
-
-    function buildUpdatedUser(formData) {
-      const base = JSON.parse(JSON.stringify(selectedUser || {}));
-
-      const email = (formData.get('email') || '').trim();
-      base.email = email;
-      const customerIdValue = parseNumberField(formData.get('customerId'));
-      if (customerIdValue === null) {
-        delete base.customerId;
-      } else {
-        base.customerId = customerIdValue;
-      }
-
-      base.clientSapId = (formData.get('clientSapId') || '').trim();
-
-      const info = { ...(base.userInfo || {}) };
-      info.firstName = (formData.get('firstName') || '').trim();
-      info.lastName = (formData.get('lastName') || '').trim();
-      info.phone = (formData.get('phone') || '').trim();
-      info.dob = (formData.get('dob') || '').trim();
-      info.documentType = (formData.get('documentType') || '').trim();
-      info.cpf = (formData.get('cpf') || '').trim();
-      info.customerIdExt = (formData.get('customerIdExt') || '').trim();
-      info.reason = (formData.get('reason') || '').trim();
-      info.rg = (formData.get('rg') || '').trim();
-      info.ie = (formData.get('ie') || '').trim();
-      info.email = email;
-      base.userInfo = info;
-
-      const existingAddress = Array.isArray(base.addresses) && base.addresses.length ? { ...base.addresses[0] } : {};
-      const addressFields = ['address1', 'address2', 'neighborhood', 'number', 'city', 'state', 'zip', 'country', 'reseller'];
-
-      let hasAddressData = false;
-      addressFields.forEach((field) => {
-        const value = (formData.get(field) || '').trim();
-        if (value) {
-          hasAddressData = true;
-        }
-        existingAddress[field] = value;
-      });
-
-      if (hasAddressData) {
-        base.addresses = [existingAddress];
-      } else {
-        base.addresses = [];
-      }
-
-      return base;
-    }
-
-    function parseNumberField(rawValue) {
-      if (rawValue === undefined || rawValue === null) return null;
-      const value = rawValue.toString().trim();
-      if (!value) return null;
-
-      const numeric = Number(value);
-      if (Number.isNaN(numeric)) {
-        return value;
-      }
-      return numeric;
-    }
-
-    function upsertUserCache(user) {
-      const index = jactoUsersCache.findIndex((item) => String(item.id) === String(user.id));
-      if (index >= 0) {
-        jactoUsersCache[index] = user;
-      } else {
-        jactoUsersCache.push(user);
-      }
-    }
-
-    async function handleDeleteUser(user) {
-      const confirmed = window.confirm(`Deseja realmente excluir o usuário ${user.email || user.id}? Uma cópia será baixada antes da exclusão.`);
-      if (!confirmed) return;
-
-      downloadUserJson(user);
-
-      setUsersStatus('Excluindo usuário...', 'info');
-      showLoading(true);
-
-      try {
-        const response = await fetch(`/jacto-users/${encodeURIComponent(user.id)}`, {
-          method: 'DELETE'
-        });
-
-        const result = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(result.error || 'Falha ao excluir usuário');
-        }
-
-        jactoUsersCache = jactoUsersCache.filter((item) => String(item.id) !== String(user.id));
-        if (selectedUser && String(selectedUser.id) === String(user.id)) {
-          selectedUser = null;
-        }
-
-        renderUsersTable(jactoUsersCache);
-        setUsersStatus('Usuário excluído com sucesso.', 'success');
-        showView('users');
-      } catch (error) {
-        console.error('Erro ao excluir usuário:', error);
-        setUsersStatus(error.message || 'Erro ao excluir usuário', 'error');
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    function downloadUserJson(user) {
-      const fileNameBase = user.id || user.email || 'usuario';
-      const safeFileName = fileNameBase.replace(/[^a-z0-9._-]/gi, '_');
-      const blob = new Blob([JSON.stringify(user, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${safeFileName}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }
-
-    // Load collections
-    async function loadCollections() {
-      showLoading(true);
-      try {
-        const response = await fetch('/collections');
-        if (!response.ok) {
-          throw new Error('Failed to fetch collections');
-        }
-        const collections = await response.json();
-        const collectionsTableBody = document.getElementById('collections-table-body');
-        collectionsTableBody.innerHTML = '';
-        collections.forEach((collection) => {
-          const tr = document.createElement('tr');
-          const tdName = document.createElement('td');
-          tdName.textContent = collection;
-          const tdActions = document.createElement('td');
-          const button = document.createElement('button');
-          button.textContent = 'Ver Documentos';
-          button.addEventListener('click', () => viewCollectionDocuments(collection));
-          tdActions.appendChild(button);
-          tr.appendChild(tdName);
-          tr.appendChild(tdActions);
-          collectionsTableBody.appendChild(tr);
-        });
-      } catch (error) {
-        console.error('Error loading collections:', error);
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    async function viewCollectionDocuments(collectionId) {
-      document.getElementById('collection-documents-title').textContent = `Documentos da Collection: ${collectionId}`;
-      showLoading(true);
-      try {
-        const response = await fetch(`/collections/${encodeURIComponent(collectionId)}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch collection documents');
-        }
-        const documents = await response.json();
-        const head = document.getElementById('collection-documents-head');
-        const body = document.getElementById('collection-documents-body');
-        head.innerHTML = '<tr><th>ID</th><th>Dados (JSON)</th></tr>';
-        body.innerHTML = '';
-        documents.forEach((doc) => {
-          const tr = document.createElement('tr');
-          const tdId = document.createElement('td');
-          tdId.textContent = doc.id;
-          const tdData = document.createElement('td');
-          tdData.textContent = JSON.stringify(doc, null, 2);
-          tr.appendChild(tdId);
-          tr.appendChild(tdData);
-          body.appendChild(tr);
-        });
-        showView('collectionDocuments');
-      } catch (error) {
-        console.error('Error loading documents:', error);
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    
-
-    // Utility functions
-    function showLoading(show) {
-      const overlay = document.getElementById('loading');
-      if (!overlay) {
-        return;
-      }
-      overlay.classList.toggle('hidden', !show);
-    }
-
-    
-
-    // Initialize
-    showView('collections');
-    loadCollections();
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
