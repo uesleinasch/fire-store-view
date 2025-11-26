@@ -73,9 +73,9 @@ app.get('/services', async (req, res) => {
     if (search) {
       const searchLower = search.toLowerCase();
       services = services.filter(s => 
-        (s.id && s.id.toLowerCase().includes(searchLower)) ||
-        (s.tipo && s.tipo.toLowerCase().includes(searchLower)) ||
-        (s.servico && s.servico.toLowerCase().includes(searchLower))
+        (s.id && String(s.id).toLowerCase().includes(searchLower)) ||
+        (s.tipo && String(s.tipo).toLowerCase().includes(searchLower)) ||
+        (s.servico && String(s.servico).toLowerCase().includes(searchLower))
       );
     }
     
@@ -238,8 +238,8 @@ app.get('/prices', async (req, res) => {
     if (search) {
       const searchLower = search.toLowerCase();
       prices = prices.filter(p => 
-        (p.id && p.id.toLowerCase().includes(searchLower)) ||
-        (p.code && p.code.toLowerCase().includes(searchLower))
+        (p.id && String(p.id).toLowerCase().includes(searchLower)) ||
+        (p.code && String(p.code).toLowerCase().includes(searchLower))
       );
     }
     
